@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="css/pretty-json.css" />
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous" />
+
+<link href="css/toastr.min.css" rel="stylesheet" />
+<script src="js/toastr.min.js"></script>
+
+<!-- lib -->
+<script type="text/javascript" src="js/underscore-min.js"></script>
+<script type="text/javascript" src="js/backbone-min.js"></script>
+
+<!-- pretty JSON v 0.1  -->
+<script type="text/javascript" src="js/pretty-json-min.js"></script>
+
+<style>
+h1 {
+	color: #6E2B77;
+	font-size: -webkit-xxx-large;
+}
+
+h2 {
+	color: #6E2B77
+}
+</style>
+
+
+<meta charset="ISO-8859-1">
+<title>Nubank Test | Denis</title>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<h1>Hello Nubanker! Denis here ;)</h1>
+				<hr />
+				<br>
+				Before you start, let me tell you a story:
+				<br>
+				<br>
+				<ul >
+				  <li>You can make all api calls from this page;</li>
+				  <li>Alternatively you can also use some script to call each endpoint directly;</li>
+				  <li>The graph is already populated with the input.txt content;</li>
+				  <li>I learned clojure last week (it was a tough week though);</li>
+				  <li>I will probably pay you a cup of coffee on or next meeting;</li>
+				  <li>Seems that you like to read lists</li>
+				</ul>
+			</div>
+		</div>
+		<br>
+		<br>
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<h2>Returning the ranking</h2>
+				<hr />
+				<span>Process the graph and return a ordered list of nodes by
+					the amount of points<br /> <br />
+				</span>
+
+				<div class="well well-sm">
+					<h4>
+						<strong>GET</strong> /graph
+						<button class="pull-right" id="rank-graph">Go!</button>
+					</h4>
+				</div>
+				<div class="well">
+					<div id="ranking" style="overflow: scroll; height: 300px;"></div>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<h2>Sending new invites</h2>
+				<hr />
+				<span>To add new nodes to the graph, enter below the IDs of
+					the source and destination nodes, they should be integers.<br /> <br />
+				</span>
+
+				<div class="well well-sm">
+					<form class="form-inline">
+						<h4>
+							<strong>POST</strong> /graph/ <input type="text"
+								class="form-control" id="inviter" placeholder="Inviter">
+							/ <input type="text" class="form-control" id="invited"
+								placeholder="Invited">
+							<button class="pull-right" id="sendInvite">Go!</button>
+						</h4>
+					</form>
+				</div>
+				<div class="well">
+					<div id="inviteResult" style="overflow: scroll; height: 100px;"></div>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<h2>Erasing the graph</h2>
+				<hr />
+				<span>Set the graph as empty<br /> <br />
+				</span>
+
+				<div class="well well-sm">
+					<h4>
+						<strong>DELETE</strong> /graph
+						<button class="pull-right" id="delete-graph">Go!</button>
+					</h4>
+				</div>
+				<div class="well">
+					<div id="deletedGraph" style="overflow: scroll; height: 100px;"></div>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<h2>Loading the graph</h2>
+				<hr />
+				<span>Load into the graph the content of the file input.txt<br />
+					<br />
+				</span>
+
+				<div class="well well-sm">
+					<h4>
+						<strong>POST</strong> /graph/load
+						<button class="pull-right" id="load-graph">Go!</button>
+					</h4>
+				</div>
+				<div class="well">
+					<div id="graphLoaded" style="overflow: scroll; height: 100px;"></div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+</body>
+
+<script type="text/javascript">
+$(document)
+.ready(
+ function() {
+
+  $("#rank-graph")
+   .click(
+    function() {
+     $
+      .get(
+       "/graph",
+       function(myData) {
+        new PrettyJSON.view.Node({
+         el: $('#ranking'),
+         data: myData
+        });
+
+        toastr
+         .success(
+          'You just got the rankings, check out your response.',
+          'You did it!')
+       });
+    });
+
+  $("#delete-graph")
+   .click(
+    function() {
+     $
+      .ajax({
+       url: '/graph',
+       type: 'DELETE',
+       success: function(
+        result) {
+        new PrettyJSON.view.Node({
+         el: $('#deletedGraph'),
+         data: result
+        });
+
+        toastr
+         .success(
+          'You have deleted the graph :( , check out your response.',
+          'You did it!')
+       }
+      });
+     return false;
+    });
+
+  
+  $("#sendInvite").click(
+		    function() {
+		     $.ajax({
+		       url: "/graph/"+$("#inviter").val() +"/" +$("#invited").val(),
+		       type: 'POST',
+		       success: function(
+		        result) {
+		    	   new PrettyJSON.view.Node({
+		    	         el: $('#inviteResult'),
+		    	         data: result
+		    	        });
+
+		    	        $("#inviter").val("");
+		    	        $("#invited").val("");
+
+		    	        toastr
+		    	         .success(
+		    	          'A new edge was added to the graph, check out your response.',
+		    	          'You did it!')
+		       },
+		       error: function(xhr,status,error){
+		    	   
+		    	   new PrettyJSON.view.Node({
+		    	         el: $('#inviteResult'),
+		    	         data: jQuery.parseJSON(xhr.responseText)
+		    	        });
+		    	   
+		    	   toastr
+		    	         .error(
+		    	          'Hey something worng happened, check out your response.',
+		    	          'Oooopss!')
+		       }
+		      });
+		     return false;
+		    });
+  
+  
+
+  $("#load-graph").click(
+    function() {
+     $.ajax({
+       url: '/graph/load',
+       type: 'POST',
+       success: function(
+        result) {
+        new PrettyJSON.view.Node({
+         el: $('#graphLoaded'),
+         data: result
+        });
+
+        toastr.success(
+          'The graph has been loaded, check out your response.',
+          'You did it!')
+       }
+      });
+     return false;
+    });
+ });
+</script>
+</html>
+
+
+
